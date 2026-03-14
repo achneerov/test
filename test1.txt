@@ -1,6 +1,3 @@
 a
 b
-
-
-s
-sds
+[contextmenu DEBUG] clientX=186 clientY=198 screenX=458 screenY=399 window.screenX=255 window.screenY=15ss
