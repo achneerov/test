@@ -3,7 +3,7 @@
  * @returns {string} - A string like "#A1C2B3"
  */
 const getRandomHexColor = () => {
-  const hexValues = '0123456789ABCDEF'sadsd
+  const hexValues = '0123456789ABCDEF'
   let color = '#';
 
   for (let i = 0; i < 6; i++) {

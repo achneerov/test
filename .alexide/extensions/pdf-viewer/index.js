@@ -3,37 +3,45 @@
     { extensions: ['.pdf'] },
     function (filePath, containerEl, showCodeView) {
       containerEl.innerHTML = '<div style="padding:12px;color:#999;">Loading PDF…</div>';
-      Promise.resolve(alexide.getFileUrl(filePath)).then(function (url) {
-        if (!url) {
+      var p = alexide.getFileArrayBuffer ? alexide.getFileArrayBuffer(filePath) : Promise.resolve(null);
+      Promise.resolve(p).then(function (data) {
+        if (!data || !data.length) {
           containerEl.innerHTML = '<div style="padding:12px;color:#c00;">Could not load PDF</div>';
           return;
         }
         var base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174';
+        function runRender(pdfjsLib) {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = base + '/pdf.worker.min.js';
+          renderPdf(data, containerEl, pdfjsLib);
+        }
         if (typeof pdfjsLib !== 'undefined') {
-          renderPdf(url, containerEl, pdfjsLib);
+          runRender(pdfjsLib);
           return;
         }
         var script = document.createElement('script');
         script.src = base + '/pdf.min.js';
         script.onload = function () {
-          if (typeof pdfjsLib !== 'undefined') {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = base + '/pdf.worker.min.js';
-            renderPdf(url, containerEl, pdfjsLib);
-          } else {
-            containerEl.innerHTML = '<div style="padding:12px;color:#c00;">PDF.js failed to load</div>';
-          }
+          if (typeof pdfjsLib !== 'undefined') runRender(pdfjsLib);
+          else containerEl.innerHTML = '<div style="padding:12px;color:#c00;">PDF.js failed to load</div>';
         };
         script.onerror = function () {
           containerEl.innerHTML = '<div style="padding:12px;color:#c00;">Could not load PDF viewer</div>';
         };
         document.head.appendChild(script);
+      }).catch(function (err) {
+        containerEl.innerHTML = '<div style="padding:12px;color:#c00;">Error: ' + (err && err.message ? err.message : String(err)) + '</div>';
       });
     }
   );
 
-  function renderPdf(url, containerEl, pdfjsLib) {
+  function renderPdf(data, containerEl, pdfjsLib) {
     containerEl.innerHTML = '<div style="padding:12px;color:#999;">Rendering PDF…</div>';
-    pdfjsLib.getDocument(url).promise.then(function (pdf) {
+    var src = data && data.length ? { data: data } : null;
+    if (!src) {
+      containerEl.innerHTML = '<div style="padding:12px;color:#c00;">Could not load PDF</div>';
+      return;
+    }
+    pdfjsLib.getDocument(src).promise.then(function (pdf) {
       containerEl.innerHTML = '';
       var scale = 1.5;
       var numPages = pdf.numPages;

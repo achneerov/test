@@ -3,7 +3,8 @@
     { extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.ico', '.svg'] },
     function (filePath, containerEl, showCodeView) {
       containerEl.innerHTML = '<div style="padding:12px;color:#999;">Loading…</div>';
-      Promise.resolve(alexide.getFileUrl(filePath)).then(function (url) {
+      var p = alexide.getFileDataUrl ? alexide.getFileDataUrl(filePath) : alexide.getFileUrl(filePath);
+      Promise.resolve(p).then(function (url) {
         if (!url) {
           containerEl.innerHTML = '<div style="padding:12px;color:#c00;">Could not load image</div>';
           return;
@@ -23,6 +24,8 @@
         };
         containerEl.innerHTML = '';
         containerEl.appendChild(img);
+      }).catch(function (err) {
+        containerEl.innerHTML = '<div style="padding:12px;color:#c00;">Error: ' + (err && err.message ? err.message : String(err)) + '</div>';
       });
     }
   );
