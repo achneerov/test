@@ -16,3 +16,7 @@ const getRandomHexColor = () => {
 // Let's see it in action
 const newColor = getRandomHexColor();
 console.log(`Your random color is: %c${newColor}`, `color: ${newColor}; font-weight: bold;`);
+
+
+
+
